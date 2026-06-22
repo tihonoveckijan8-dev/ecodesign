@@ -120,7 +120,7 @@
 
             if (slider && prevBtn && nextBtn) {
                 const START_NUM = 4;
-                const END_NUM = 30;
+                const END_NUM = 29;
                 const IMG_PATH = 'photos/';
                 const IMG_EXT = '.png';
                 let currentIndex = 0;
