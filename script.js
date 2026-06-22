@@ -6,15 +6,15 @@
             const counter = document.getElementById('sliderCounter');
 
             if (slider && prevBtn && nextBtn) {
-                // ✅ Укажите точные номера ваших 29 фото. 
-                // Если фото называются 1.png, 2.png ... 29.png, оставьте как есть:
+                // ✅ Здесь мы жестко задаем ровно 29 фотографий. 
+                // Убедитесь, что в папке photos/ лежат файлы 1.png, 2.png ... 29.png.
                 const START_NUM = 1;
-                const END_NUM = 29; // Всего будет 29 фотографий (29 - 1 + 1 = 29)
+                const END_NUM = 29; 
                 
                 const IMG_PATH = 'photos/';
                 const IMG_EXT = '.png';
                 let currentIndex = 0;
-                const totalSlides = END_NUM - START_NUM + 1; // Строго 29
+                const totalSlides = END_NUM - START_NUM + 1; // Будет ровно 29
                 let slides = [];
 
                 function createSlide(index, photoNumber) {
@@ -27,19 +27,13 @@
                     img.alt = `Фото ${photoNumber}`;
                     img.loading = 'lazy';
 
-                    // Если случайно фото не загрузится - покажем простую заглушку без текста "не найдено"
+                    // Если фото нет, создается заглушка. 
+                    // Текст "(не найдено)" убран, CSS сам красиво её оформит.
                     img.addEventListener('error', () => {
                         img.style.display = 'none';
                         const placeholder = document.createElement('div');
                         placeholder.className = 'slide-placeholder';
                         placeholder.textContent = `📸 Фото ${photoNumber}`;
-                        placeholder.style.background = `#1a2a4a`; // Темно-синий фон
-                        placeholder.style.display = 'flex';
-                        placeholder.style.alignItems = 'center';
-                        placeholder.style.justifyContent = 'center';
-                        placeholder.style.fontSize = '2rem';
-                        placeholder.style.color = 'white';
-                        placeholder.style.height = '500px';
                         slide.prepend(placeholder);
                     });
 
@@ -61,12 +55,16 @@
                     slides.forEach((slide, i) => {
                         slide.classList.toggle('active', i === currentIndex);
                     });
+                    
+                    // Обновляем точки
                     if (dotsContainer && dotsContainer.style.display !== 'none') {
                         const dots = dotsContainer.children;
                         for (let i = 0; i < dots.length; i++) {
                             dots[i].classList.toggle('active', i === currentIndex);
                         }
                     }
+                    
+                    // Обновляем счетчик. Теперь он будет корректным: 1/29, 29/29
                     if (counter) {
                         counter.textContent = `${currentIndex + 1} / ${totalSlides}`;
                     }
@@ -86,6 +84,38 @@
                         dotsContainer.appendChild(dot);
                     }
                 }
+
+                buildSlides();
+                createDots();
+                updateSlider();
+                toggleDotsOnMobile(); // Ваша существующая функция для мобильных точек
+
+                prevBtn.addEventListener('click', () => {
+                    currentIndex = (currentIndex - 1 + totalSlides) % totalSlides;
+                    updateSlider();
+                });
+                nextBtn.addEventListener('click', () => {
+                    currentIndex = (currentIndex + 1) % totalSlides;
+                    updateSlider();
+                });
+
+                let touchStartX = 0;
+                slider.addEventListener('touchstart', (e) => {
+                    touchStartX = e.changedTouches[0].screenX;
+                }, { passive: true });
+                slider.addEventListener('touchend', (e) => {
+                    const touchEndX = e.changedTouches[0].screenX;
+                    const diff = touchEndX - touchStartX;
+                    if (Math.abs(diff) > 50) {
+                        if (diff < 0) {
+                            currentIndex = (currentIndex + 1) % totalSlides;
+                        } else {
+                            currentIndex = (currentIndex - 1 + totalSlides) % totalSlides;
+                        }
+                        updateSlider();
+                    }
+                });
+            }
 
                 buildSlides();
                 createDots();
