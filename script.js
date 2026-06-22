@@ -122,7 +122,7 @@
             if (slider && prevBtn && nextBtn) {
                 // ⚠️ Впишите сюда точные номера ваших фотографий, чтобы не генерировать лишние
                 const START_NUM = 1;     // Первая фотография (например, 1)
-                const END_NUM = 31;      // Последняя фотография (например, 31)
+                const END_NUM = 29;      // Последняя фотография (например, 31)
                 const IMG_PATH = 'photos/';
                 const IMG_EXT = '.png';
                 let currentIndex = 0;
