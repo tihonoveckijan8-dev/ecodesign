@@ -112,6 +112,7 @@
             }
 
             // ---------- СЛАЙДЕР С РЕАЛЬНЫМИ ФОТО ----------
+                        // ---------- СЛАЙДЕР С АВТОМАТИЧЕСКИМ УДАЛЕНИЕМ БИТЫХ ФОТО ----------
             const slider = document.getElementById('slider');
             const prevBtn = document.getElementById('prevSlide');
             const nextBtn = document.getElementById('nextSlide');
@@ -119,12 +120,13 @@
             const counter = document.getElementById('sliderCounter');
 
             if (slider && prevBtn && nextBtn) {
-                const START_NUM = 1;    // было 4
-                const END_NUM = 27;     // осталось 29 (было 29, но с началом 4 давало 26)
+                // ⚠️ Впишите сюда точные номера ваших фотографий, чтобы не генерировать лишние
+                const START_NUM = 1;     // Первая фотография (например, 1)
+                const END_NUM = 31;      // Последняя фотография (например, 31)
                 const IMG_PATH = 'photos/';
                 const IMG_EXT = '.png';
                 let currentIndex = 0;
-                const totalSlides = END_NUM - START_NUM + 1; // теперь = 29
+                let totalSlides = 0;
                 let slides = [];
 
                 function createSlide(index, photoNumber) {
@@ -137,30 +139,53 @@
                     img.alt = `Фото ${photoNumber}`;
                     img.loading = 'lazy';
 
+                    // ВАЖНОЕ ИЗМЕНЕНИЕ: при ошибке загрузки слайд удаляется
                     img.addEventListener('error', () => {
-                        img.style.display = 'none';
-                        const placeholder = document.createElement('div');
-                        placeholder.className = 'slide-placeholder';
-                        placeholder.textContent = `📸 Фото ${photoNumber} (не найдено)`;
-                        placeholder.style.background = `hsl(${photoNumber * 18 % 360}, 70%, 35%)`;
-                        slide.prepend(placeholder);
+                        slide.remove(); // Удаляем этот слайд из DOM
+                        updateGlobal(); // Перестраиваем весь слайдер
                     });
 
-                    const caption = document.createElement('div');
-                    caption.className = 'slide-caption';
                     slide.appendChild(img);
-                    slide.appendChild(caption);
                     return slide;
                 }
 
-                function buildSlides() {
-                    const fragment = document.createDocumentFragment();
-                    for (let num = START_NUM; num <= END_NUM; num++) {
-                        fragment.appendChild(createSlide(num - START_NUM, num));
-                    }
-                    slider.innerHTML = '';
-                    slider.appendChild(fragment);
+                function updateGlobal() {
                     slides = document.querySelectorAll('#slider .slide');
+                    totalSlides = slides.length;
+
+                    if (totalSlides === 0) {
+                        // Если не загрузилась ни одна фотография
+                        const emptyMsg = document.createElement('div');
+                        emptyMsg.className = 'slide active';
+                        emptyMsg.style.display = 'flex';
+                        emptyMsg.style.alignItems = 'center';
+                        emptyMsg.style.justifyContent = 'center';
+                        emptyMsg.style.padding = '3rem';
+                        emptyMsg.style.background = '#2a3a25';
+                        emptyMsg.style.color = 'white';
+                        emptyMsg.style.fontSize = '1.2rem';
+                        emptyMsg.textContent = '📸 Загрузите фотографии в папку photos/';
+                        slider.appendChild(emptyMsg);
+                        slides = document.querySelectorAll('#slider .slide');
+                        totalSlides = 1;
+                    }
+
+                    // Корректировка текущего индекса
+                    if (currentIndex >= totalSlides) currentIndex = totalSlides - 1;
+                    if (currentIndex < 0) currentIndex = 0;
+
+                    updateSlider();
+                    createDots();
+                    toggleDotsOnMobile();
+                }
+
+                function buildSlides() {
+                    slider.innerHTML = '';
+                    for (let num = START_NUM; num <= END_NUM; num++) {
+                        const slide = createSlide(num - START_NUM, num);
+                        slider.appendChild(slide);
+                    }
+                    updateGlobal();
                 }
 
                 function updateSlider() {
@@ -194,17 +219,18 @@
                 }
 
                 buildSlides();
-                createDots();
-                updateSlider();
-                toggleDotsOnMobile();
 
                 prevBtn.addEventListener('click', () => {
-                    currentIndex = (currentIndex - 1 + totalSlides) % totalSlides;
-                    updateSlider();
+                    if (totalSlides > 0) {
+                        currentIndex = (currentIndex - 1 + totalSlides) % totalSlides;
+                        updateSlider();
+                    }
                 });
                 nextBtn.addEventListener('click', () => {
-                    currentIndex = (currentIndex + 1) % totalSlides;
-                    updateSlider();
+                    if (totalSlides > 0) {
+                        currentIndex = (currentIndex + 1) % totalSlides;
+                        updateSlider();
+                    }
                 });
 
                 let touchStartX = 0;
@@ -214,7 +240,7 @@
                 slider.addEventListener('touchend', (e) => {
                     const touchEndX = e.changedTouches[0].screenX;
                     const diff = touchEndX - touchStartX;
-                    if (Math.abs(diff) > 50) {
+                    if (Math.abs(diff) > 50 && totalSlides > 0) {
                         if (diff < 0) {
                             currentIndex = (currentIndex + 1) % totalSlides;
                         } else {
@@ -224,7 +250,6 @@
                     }
                 });
             }
-
             // ---------- ПОСТРОЕНИЕ МАРШРУТА ----------
             const buildBtn = document.getElementById('buildRouteBtn');
             const startInput = document.getElementById('startPoint');
