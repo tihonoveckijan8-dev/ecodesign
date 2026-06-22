@@ -119,7 +119,7 @@
             const counter = document.getElementById('sliderCounter');
 
             if (slider && prevBtn && nextBtn) {
-                const START_NUM = 1;    // было 4
+                const START_NUM = 4;    // было 4
                 const END_NUM = 29;     // осталось 29 (было 29, но с началом 4 давало 26)
                 const IMG_PATH = 'photos/';
                 const IMG_EXT = '.png';
