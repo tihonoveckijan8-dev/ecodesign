@@ -119,12 +119,12 @@
             const counter = document.getElementById('sliderCounter');
 
             if (slider && prevBtn && nextBtn) {
-                const START_NUM = 4;
-                const END_NUM = 29;
+                const START_NUM = 1;    // было 4
+                const END_NUM = 29;     // осталось 29 (было 29, но с началом 4 давало 26)
                 const IMG_PATH = 'photos/';
                 const IMG_EXT = '.png';
                 let currentIndex = 0;
-                const totalSlides = END_NUM - START_NUM + 1;
+                const totalSlides = END_NUM - START_NUM + 1; // теперь = 29
                 let slides = [];
 
                 function createSlide(index, photoNumber) {
